@@ -1,6 +1,6 @@
 from django.db.models import DecimalField
 from django.shortcuts import render, HttpResponse, reverse, redirect
-from .models import Items, Balance
+from .models import Items, Balance, Client
 from django.contrib.auth.models import User  # Use Django's built-in User model for authentication
 from django.contrib.auth import authenticate, login
 
@@ -41,13 +41,27 @@ def mylogin(request):
 
 
 def homepage(request):
-    # Retrieve all items from the Items model (if you still want to show them)
-    obj_item = Items.objects.all()
+    user = request.user
 
-    # Get the most recent balance (assuming only one balance record)
-    balance = Balance.objects.get(id=5)  # You can use .first() or other methods depending on how many records you have
+    try:
+        # Retrieve the client associated with the user
+        client = Client.objects.get(user=user)
 
-    return render(request, 'home.html', {'itm': obj_item, 'balance': balance})
+        # Try to get the balance for the client
+        try:
+            balance = Balance.objects.get(client=client)
+        except Balance.DoesNotExist:
+            # If no balance exists, create a new one
+            balance = Balance.objects.create(client=client, balance=0, remaining_balance=0, spend_amount=0, count=0)
+
+        # Retrieve items for the client (if needed)
+        items = Items.objects.filter(client=client)
+
+        return render(request, 'home.html', {'itm': items, 'balance': balance})
+
+    except Client.DoesNotExist:
+        return HttpResponse("Client not found.", status=404)
+
 
 
 def myprofile(request):
@@ -67,35 +81,56 @@ def myadditem(request):
         ps = float(request.POST['price'])
         qty = int(request.POST['quantity'])
         tot = ps * qty
-        balance = Balance.objects.get(id=5)
-        if balance.remaining_balance >= tot:  # Check if there's enough balance
-            balance.remaining_balance -= tot
-            balance.spend_amount = balance.count + tot
-            balance.count = balance.count + tot
-            balance.save()
-        else:
-            # Handle insufficient balance
-            return render(request, 'add_item.html', {'error': 'Insufficient balance'})
 
-        # Save the item to the database
-        new_item = Items(name=it, price=ps, quantity=qty, total=tot)
-        new_item.save()
+        # get the current login user
+        user = request.user
 
-        # Redirect to the homepage after saving
-        return redirect('homepage')  # 'homepage' should match the URL name
+        try:
+            # retrieve the client associated with the login user
+            client = Client.objects.get(user=user)
+
+            # get the client balance
+            balance = Balance.objects.get(client=client)
+
+            if balance.remaining_balance >= tot:
+                # Update the balance
+                balance.remaining_balance -= tot
+                balance.spend_amount = balance.spend_amount  + tot
+                balance.save()
+            else:
+                return render(request, 'add_item.html', {'error': 'Insufficient balance'})
+
+            # save the item to the database
+            new_item = Items(name=it, price=ps, quantity=qty, total=tot, client=client)
+            new_item.save()
+
+            # after saving redirect to the homepage
+            return redirect('homepage')
+
+        except Client.DoesNotExist:
+            return HttpResponse("Client not found.", status=404)
 
     return render(request, 'add_item.html')
 
 
 def delete(request, id):
-    new_item = Items.objects.get(pk=id)
     try:
+        new_item = Items.objects.get(pk=id)
+
+        client = new_item.client
+
+        # get the balance for the client
+        balance = Balance.objects.get(client=client)
+
+        balance.remaining_balance = balance.remaining_balance + new_item.total
+        balance.spend_amount = balance.spend_amount - new_item.total
+        balance.save()
+
         new_item.delete()
         return redirect(reverse('homepage'))
-
-    except:
-        return HttpResponse('Data not found....')
-
+    # if item is not found
+    except Items.DoesNotExist:
+        return HttpResponse('Item not found')
 
 def update_item(request, id):
     item = Items.objects.get(pk=id)
@@ -108,7 +143,7 @@ def update_item(request, id):
 
         # Check for missing fields
         if not it or not ps or not qty:
-            return HttpResponse("All fields are required.", status=400)
+            return HttpResponse("All fields are required.")
 
         # Update the item
         item.name = it
@@ -126,19 +161,31 @@ def update_item(request, id):
 
 def mybalance(request):
     if request.method == 'POST':
-        # Get the balance from the form
+        # get the balance from the form
         bal = request.POST['balance']
 
-        # Save the balance in the 'Balance' model
-        new_balance = Balance.objects.get(id=5)
-        new_balance.balance = bal
-        new_balance.remaining_balance = bal
-        new_balance.spend_amount = 0
-        new_balance.count = 0
-        new_balance.save()
+        # get the logged-in user
+        user = request.user
 
-        # Redirect to the homepage after saving
-        return redirect('homepage')
+        try:
+            # retrieve the client associated with the user
+            client = Client.objects.get(user=user)
+
+            # retrieve or create the balance for the client
+            balance, created = Balance.objects.get_or_create(client=client)
+
+            # Update the balance
+            balance.balance = bal
+            balance.remaining_balance = bal  # assuming remaining balance starts equal to the total balance
+            balance.spend_amount = 0  # assuming no spending initially
+            balance.count = 0  # assuming the initial count is zero
+            balance.save()
+
+            # redirect to the homepage after saving
+            return redirect('homepage')
+
+        except Client.DoesNotExist:
+            return HttpResponse("Client not found.", status=404)
 
     return render(request, 'add_balance.html')
 
