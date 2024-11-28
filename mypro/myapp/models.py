@@ -15,6 +15,7 @@ class Items(models.Model):
     price = models.FloatField(default=0.0)
     quantity = models.IntegerField(default=0.0)
     total = models.FloatField(max_length=10, default=0)
+    catagory = models.CharField(max_length = 25,null=True)
     client = models.ForeignKey(Client, on_delete=models.CASCADE,null = True)
 
 

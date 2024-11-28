@@ -133,31 +133,53 @@ def delete(request, id):
         return HttpResponse('Item not found')
 
 def update_item(request, id):
+    # retrieve the item using its primary key (id)
     item = Items.objects.get(pk=id)
+    client = item.client  # Get the client associated with the item
+
+    # retrieve the balance for the client
+    balance = Balance.objects.get(client=client)
 
     if request.method == 'POST':
+        # get the updated item details from the form
         it = request.POST.get('itemName')
         ps = float(request.POST.get('price'))
         qty = int(request.POST.get('quantity'))
-        tot = ps * qty
+        new_total = ps * qty  # Calculate the new total
 
-        # Check for missing fields
+        # check for missing fields
         if not it or not ps or not qty:
             return HttpResponse("All fields are required.")
 
-        # Update the item
+        # calculate the difference between the old and new totals
+        total_difference = new_total - item.total
+
+        # check if there is enough balance for the new total
+        if balance.remaining_balance >= total_difference:
+            # update the balance
+            balance.remaining_balance -= total_difference
+            balance.spend_amount += total_difference
+            balance.save()
+        else:
+            # handle insufficient balance
+            return HttpResponse("Insufficient balance to update the item.")
+
+        # update the item fields
         item.name = it
         item.price = ps
         item.quantity = qty
-        item.total = tot
+        item.total = new_total
 
         try:
+            # save the updated item
             item.save()
             return redirect(reverse('homepage'))
         except:
-            return HttpResponse('Invalid Data....')
+            return HttpResponse("Invalid Data....")
 
+    # render the update form with the current item details
     return render(request, 'updating_form.html', {'obj': item})
+
 
 def mybalance(request):
     if request.method == 'POST':
@@ -188,4 +210,13 @@ def mybalance(request):
             return HttpResponse("Client not found.", status=404)
 
     return render(request, 'add_balance.html')
+
+def mycatagories(request):
+    if request.method == 'POST':
+        cat = request.POST['catagory']
+        new_item = Items(catagory = cat)
+        new_item.save()
+        return redirect('homepage')
+
+    return render(request, 'catagories.html')
 
