@@ -7,17 +7,17 @@
   <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body class="bg-gradient-to-r from-blue-100 via-purple-100 to-pink-100 min-h-screen flex items-center justify-center">
- <form method="POST" action=>
-        {% csrf_token %}
-    <div class="container mx-auto px-4">
+  <div class="container mx-auto px-4">
     <h1 class="text-4xl font-extrabold text-center text-gray-800 mb-12">
       Explore Our <span class="text-purple-600">Categories</span>
     </h1>
 
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
       <!-- Food Category -->
-      <a href="http://127.0.0.1:8000/myadditem/" class="group relative block bg-white rounded-lg shadow-lg hover:shadow-xl hover:-translate-y-2 transition duration-300">
-        <div class="p-6 text-center">
+      <form method="POST" action="{% url 'mycategories' %}" class="group relative block bg-white rounded-lg shadow-lg hover:shadow-xl hover:-translate-y-2 transition duration-300">
+        {% csrf_token %}
+        <input type="hidden" name="category" value="Food">
+        <button type="submit" class="p-6 text-center w-full">
           <div class="text-6xl text-red-500 mb-4">
             🍔
           </div>
@@ -25,12 +25,14 @@
             Food
           </h2>
           <p class="text-gray-500 mt-2">Browse delicious meals and snacks.</p>
-        </div>
-      </a>
+        </button>
+      </form>
 
       <!-- Toys Category -->
-      <a href="http://127.0.0.1:8000/myadditem/" class="group relative block bg-white rounded-lg shadow-lg hover:shadow-xl hover:-translate-y-2 transition duration-300">
-        <div class="p-6 text-center">
+      <form method="POST" action="{% url 'mycategories' %}" class="group relative block bg-white rounded-lg shadow-lg hover:shadow-xl hover:-translate-y-2 transition duration-300">
+        {% csrf_token %}
+        <input type="hidden" name="category" value="Toys">
+        <button type="submit" class="p-6 text-center w-full">
           <div class="text-6xl text-green-500 mb-4">
             🧸
           </div>
@@ -38,12 +40,14 @@
             Toys
           </h2>
           <p class="text-gray-500 mt-2">Find fun and playful toys for all ages.</p>
-        </div>
-      </a>
+        </button>
+      </form>
 
       <!-- Electronics Category -->
-      <a href="http://127.0.0.1:8000/myadditem/" class="group relative block bg-white rounded-lg shadow-lg hover:shadow-xl hover:-translate-y-2 transition duration-300">
-        <div class="p-6 text-center">
+      <form method="POST" action="{% url 'mycategories' %}" class="group relative block bg-white rounded-lg shadow-lg hover:shadow-xl hover:-translate-y-2 transition duration-300">
+        {% csrf_token %}
+        <input type="hidden" name="category" value="Electronics">
+        <button type="submit" class="p-6 text-center w-full">
           <div class="text-6xl text-yellow-500 mb-4">
             📱
           </div>
@@ -51,12 +55,14 @@
             Electronics
           </h2>
           <p class="text-gray-500 mt-2">Explore gadgets and electronic devices.</p>
-        </div>
-      </a>
+        </button>
+      </form>
 
       <!-- Clothing Category -->
-      <a href="http://127.0.0.1:8000/myadditem/" class="group relative block bg-white rounded-lg shadow-lg hover:shadow-xl hover:-translate-y-2 transition duration-300">
-        <div class="p-6 text-center">
+      <form method="POST" action="{% url 'mycategories' %}" class="group relative block bg-white rounded-lg shadow-lg hover:shadow-xl hover:-translate-y-2 transition duration-300">
+        {% csrf_token %}
+        <input type="hidden" name="category" value="Clothing">
+        <button type="submit" class="p-6 text-center w-full">
           <div class="text-6xl text-purple-500 mb-4">
             👗
           </div>
@@ -64,12 +70,14 @@
             Clothing
           </h2>
           <p class="text-gray-500 mt-2">Shop for trendy and stylish outfits.</p>
-        </div>
-      </a>
+        </button>
+      </form>
 
       <!-- Stationery Category -->
-      <a href="http://127.0.0.1:8000/myadditem/" class="group relative block bg-white rounded-lg shadow-lg hover:shadow-xl hover:-translate-y-2 transition duration-300">
-        <div class="p-6 text-center">
+      <form method="POST" action="{% url 'mycategories' %}" class="group relative block bg-white rounded-lg shadow-lg hover:shadow-xl hover:-translate-y-2 transition duration-300">
+        {% csrf_token %}
+        <input type="hidden" name="category" value="Stationery">
+        <button type="submit" class="p-6 text-center w-full">
           <div class="text-6xl text-blue-500 mb-4">
             ✏️
           </div>
@@ -77,12 +85,14 @@
             Stationery
           </h2>
           <p class="text-gray-500 mt-2">Get supplies for school and office.</p>
-        </div>
-      </a>
+        </button>
+      </form>
 
       <!-- Miscellaneous Category -->
-      <a href="http://127.0.0.1:8000/myadditem/" class="group relative block bg-white rounded-lg shadow-lg hover:shadow-xl hover:-translate-y-2 transition duration-300">
-        <div class="p-6 text-center">
+      <form method="POST" action="{% url 'mycategories' %}" class="group relative block bg-white rounded-lg shadow-lg hover:shadow-xl hover:-translate-y-2 transition duration-300">
+        {% csrf_token %}
+        <input type="hidden" name="category" value="Miscellaneous">
+        <button type="submit" class="p-6 text-center w-full">
           <div class="text-6xl text-gray-500 mb-4">
             🛍️
           </div>
@@ -90,8 +100,9 @@
             Miscellaneous
           </h2>
           <p class="text-gray-500 mt-2">Explore other unique items.</p>
-        </div>
-      </a>
+        </button>
+      </form>
+
     </div>
   </div>
 </body>

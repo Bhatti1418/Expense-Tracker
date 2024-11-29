@@ -84,6 +84,9 @@ def myadditem(request):
 
         # get the current login user
         user = request.user
+        selected_category = request.session.get('selected_category')
+        if not selected_category:
+            return HttpResponse("Category not selected.")
 
         try:
             # retrieve the client associated with the login user
@@ -97,18 +100,22 @@ def myadditem(request):
                 balance.remaining_balance -= tot
                 balance.spend_amount = balance.spend_amount  + tot
                 balance.save()
+            elif balance.remaining_balance <= tot:
+                return HttpResponse("Insuficient Balance.")
             else:
                 return render(request, 'add_item.html', {'error': 'Insufficient balance'})
-
             # save the item to the database
-            new_item = Items(name=it, price=ps, quantity=qty, total=tot, client=client)
+            new_item = Items(name=it, price=ps, quantity=qty, total=tot,catagory=selected_category, client=client)
             new_item.save()
+
+            if 'selected_category' in request.session:
+                del request.session['selected_category']
 
             # after saving redirect to the homepage
             return redirect('homepage')
 
         except Client.DoesNotExist:
-            return HttpResponse("Client not found.", status=404)
+            return HttpResponse("Client not found.")
 
     return render(request, 'add_item.html')
 
@@ -207,16 +214,20 @@ def mybalance(request):
             return redirect('homepage')
 
         except Client.DoesNotExist:
-            return HttpResponse("Client not found.", status=404)
+            return HttpResponse("Client not found.")
 
     return render(request, 'add_balance.html')
 
-def mycatagories(request):
+def mycategories(request):
     if request.method == 'POST':
-        cat = request.POST['catagory']
-        new_item = Items(catagory = cat)
-        new_item.save()
-        return redirect('homepage')
+        #get the selected category
+        category = request.POST.get('category')
 
+        if category:
+            request.session['selected_category'] = category
+            return redirect('myadditem')
+        else:
+            return HttpResponse("No category selected.")
     return render(request, 'catagories.html')
+
 

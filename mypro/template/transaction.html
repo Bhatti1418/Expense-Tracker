@@ -20,6 +20,7 @@
                 <table class="w-full table-auto border-collapse">
                     <thead>
                         <tr class="bg-purple-600 text-white">
+                            <th class="py-3 px-6 text-center font-semibold">Categories</th>
                             <th class="py-3 px-6 text-center font-semibold">Buying Item</th>
                             <th class="py-3 px-6 text-center font-semibold">Price</th>
                             <th class="py-3 px-6 text-center font-semibold">Quantity</th>
@@ -29,6 +30,7 @@
                     <tbody>
                         {% for i in itm %}
                         <tr class="border-b last:border-none hover:bg-purple-50">
+                            <td class="py-4 px-6 text-center font-medium">{{ i.catagory }}</td>
                             <td class="py-4 px-6 text-center font-medium">{{ i.name }}</td>
                             <td class="py-4 px-6 text-center">{{ i.price }}</td>
                             <td class="py-4 px-6 text-center">{{ i.quantity }}</td>
